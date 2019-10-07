@@ -4,12 +4,6 @@ import com.intellij.execution.configuration.EnvironmentVariablesComponent;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.execution.ui.CommonJavaParametersPanel;
-import javax.swing.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.CollectionComboBoxModel;
@@ -19,10 +13,7 @@ import com.poratu.idea.plugins.tomcat.utils.PluginUtils;
 import org.jdesktop.swingx.JXButton;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
 import java.util.List;
 
 /**
@@ -43,6 +34,18 @@ public class RunnerSetting {
     private EnvironmentVariablesComponent envOptions;
     private JFormattedTextField ajpPort;
     private JFormattedTextField adminPort;
+    private JFormattedTextField className;
+    private JFormattedTextField debug;
+    private JFormattedTextField digest;
+    private JFormattedTextField roleNameCol;
+    private JFormattedTextField userCredCol;
+    private JFormattedTextField userNameCol;
+    private JFormattedTextField userRoleTable;
+    private JFormattedTextField userTable;
+    private JFormattedTextField jndiGlobal;
+    private JFormattedTextField jndiName;
+    private JFormattedTextField jndiType;
+    private JFormattedTextField dataSourceName;
     private Project project;
 
     public RunnerSetting(Project project) {
@@ -87,6 +90,54 @@ public class RunnerSetting {
 
     public EnvironmentVariablesComponent getEnvOptions() {
         return envOptions;
+    }
+
+    public JFormattedTextField getClassName() {
+        return className;
+    }
+
+    public JFormattedTextField getDebug() {
+        return debug;
+    }
+
+    public JFormattedTextField getDigest() {
+        return digest;
+    }
+
+    public JFormattedTextField getRoleNameCol() {
+        return roleNameCol;
+    }
+
+    public JFormattedTextField getUserCredCol() {
+        return userCredCol;
+    }
+
+    public JFormattedTextField getUserNameCol() {
+        return userNameCol;
+    }
+
+    public JFormattedTextField getUserRoleTable() {
+        return userRoleTable;
+    }
+
+    public JFormattedTextField getUserTable() {
+        return userTable;
+    }
+
+    public JFormattedTextField getJndiGlobal() {
+        return jndiGlobal;
+    }
+
+    public JFormattedTextField getJndiName() {
+        return jndiName;
+    }
+
+    public JFormattedTextField getJndiType() {
+        return jndiType;
+    }
+
+    public JFormattedTextField getDataSourceName() {
+        return dataSourceName;
     }
 
     private void createUIComponents() {

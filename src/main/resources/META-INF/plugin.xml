@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>com.poratu.idea.plugins.tomcat</id>
   <name>Smart Tomcat</name>
-  <version>2.6</version>
+  <version>3.0</version>
   <vendor email="zengkid@msn.com">zengkid</vendor>
 
   <description><![CDATA[
@@ -15,18 +15,19 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Use native environment variables component. provide by <a href="https://github.com/jamesanto">James Anto</a>)
-    ]]>
-  </change-notes>
+      a quick fixed for supporting 2019.2+ version
+      fixed find module NullPointer exception
+    ]]></change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="141.0"/>
+  <idea-version since-build="163.0"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
   <!-- uncomment to enable plugin in all products
   <depends>com.intellij.modules.lang</depends>
   -->
+  <depends>com.intellij.modules.java</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable instance="com.poratu.idea.plugins.tomcat.setting.TomcatSettingConfigurable"/>
