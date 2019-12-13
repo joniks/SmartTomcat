@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.10'
+    id 'org.jetbrains.intellij' version '0.4.14'
 }
 
-version '3.0.1'
+version '3.5.0'
 
 sourceCompatibility = 1.8
 
@@ -16,17 +16,17 @@ dependencies {
 }
 
 intellij {
-    version '2019.2.2'
+    version '2019.3'
     pluginName = 'SmartTomcat'
     plugins 'java'
     updateSinceUntilBuild false
 }
 patchPluginXml {
     changeNotes """
-      a quick fixed for supporting 2019.2+ version.
-      <a href="https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/">extracted Java functionality into a separate plugin</a>
-      """
+      new feature: Additional context parameters in custom context.xml. 
+      fixed: 2019.3 storage issue.
+   """
 }
-//publishPlugin {
-//    token intellijPublishToken
-//}gr
+/*publishPlugin {
+    token intellijPublishToken
+}*/

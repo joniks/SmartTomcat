@@ -15,7 +15,6 @@ import com.intellij.ui.ComboboxWithBrowseButton;
 import com.intellij.ui.DocumentAdapter;
 import com.poratu.idea.plugins.tomcat.setting.RunnerSetting;
 import com.poratu.idea.plugins.tomcat.setting.TomcatInfo;
-import com.poratu.idea.plugins.tomcat.setting.TomcatInfoConfigs;
 import com.poratu.idea.plugins.tomcat.setting.TomcatSettingConfigurable;
 import org.jdesktop.swingx.JXButton;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +23,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.Map;
@@ -37,34 +34,33 @@ import java.util.Map;
  */
 public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration> {
     private final Project project;
-    private final TomcatRunConfiguration tomcatRunConfiguration;
     private RunnerSetting runnerSetting;
 
     public TomcatSettingsEditor(TomcatRunConfiguration tomcatRunConfiguration, Project project) {
         runnerSetting = new RunnerSetting(project);
-        this.tomcatRunConfiguration = tomcatRunConfiguration;
         this.project = project;
         super.resetFrom(tomcatRunConfiguration);
     }
 
     @Override
     protected void resetEditorFrom(TomcatRunConfiguration tomcatRunConfiguration) {
-//        String tomcatInstallation = tomcatRunConfiguration.getTomcatInstallation();
+
         TomcatInfo tomcatInfo = tomcatRunConfiguration.getTomcatInfo();
         if (tomcatInfo != null) {
             runnerSetting.getTomcatField().getComboBox().setSelectedItem(tomcatInfo);
         }
-//        if (tomcatInstallation == null || tomcatInstallation.trim().equals("")) {
-//            tomcatInstallation = tomcatInfo.getPath();
-//        }
-//        if (tomcatInstallation != null && !"".equals(tomcatInstallation.trim())) {
-//            runnerSetting.getTomcatField().getComboBox().setSelectedItem(tomcatInstallation);
-//        }
+
         String docBase = tomcatRunConfiguration.getDocBase();
         if (docBase != null && !"".equals(docBase.trim())) {
-
             runnerSetting.getDocBaseField().setText(docBase);
             runnerSetting.getDocBaseField().getTextField().setText(docBase);
+        }
+
+        String customContext = tomcatRunConfiguration.getCustomContext();
+        if (customContext != null && !"".equals(customContext.trim())) {
+
+            runnerSetting.getCustomContextField().setText(customContext);
+            runnerSetting.getCustomContextField().getTextField().setText(customContext);
         }
 
         String contextPath = tomcatRunConfiguration.getContextPath();
@@ -99,76 +95,16 @@ public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration>
             runnerSetting.getEnvOptions().setPassParentEnvs(passParentEnvs);
         }
 
-        String className = tomcatRunConfiguration.getClassName();
-        if (className != null && !"".equals(className.trim())) {
-            runnerSetting.getClassName().setText(className);
-        }
-
-        String debug = tomcatRunConfiguration.getDebug();
-        if (debug != null && !"".equals(debug.trim())) {
-            runnerSetting.getDebug().setText(debug);
-        }
-
-        String digest = tomcatRunConfiguration.getDigest();
-        if (digest != null && !"".equals(digest.trim())) {
-            runnerSetting.getDigest().setText(digest);
-        }
-
-        String roleNameCol = tomcatRunConfiguration.getRoleNameCol();
-        if (roleNameCol != null && !"".equals(roleNameCol.trim())) {
-            runnerSetting.getRoleNameCol().setText(roleNameCol);
-        }
-
-        String userCredCol = tomcatRunConfiguration.getUserCredCol();
-        if (userCredCol != null && !"".equals(userCredCol.trim())) {
-            runnerSetting.getUserCredCol().setText(userCredCol);
-        }
-
-        String userNameCol = tomcatRunConfiguration.getUserNameCol();
-        if (userNameCol != null && !"".equals(userNameCol.trim())) {
-            runnerSetting.getUserNameCol().setText(userNameCol);
-        }
-
-        String userRoleTable = tomcatRunConfiguration.getUserRoleTable();
-        if (userRoleTable != null && !"".equals(userRoleTable.trim())) {
-            runnerSetting.getUserRoleTable().setText(userRoleTable);
-        }
-
-        String userTable = tomcatRunConfiguration.getUserTable();
-        if (userTable != null && !"".equals(userTable.trim())) {
-            runnerSetting.getUserTable().setText(userTable);
-        }
-
-        String jndiGlobal = tomcatRunConfiguration.getJndiGlobal();
-        if (jndiGlobal != null && !"".equals(jndiGlobal.trim())) {
-            runnerSetting.getJndiGlobal().setText(jndiGlobal);
-        }
-
-        String jndiName = tomcatRunConfiguration.getJndiName();
-        if (jndiName != null && !"".equals(jndiName.trim())) {
-            runnerSetting.getJndiName().setText(jndiName);
-        }
-
-        String jndiType = tomcatRunConfiguration.getJndiType();
-        if (jndiType != null && !"".equals(jndiType.trim())) {
-            runnerSetting.getJndiType().setText(jndiType);
-        }
-
-        String dataSourceName = tomcatRunConfiguration.getDataSourceName();
-        if (dataSourceName != null && !"".equals(dataSourceName.trim())) {
-            runnerSetting.getDataSourceName().setText(dataSourceName);
-        }
-
     }
 
     @Override
     protected void applyEditorTo(TomcatRunConfiguration tomcatRunConfiguration) throws ConfigurationException {
         TomcatInfo selectedItem = (TomcatInfo) runnerSetting.getTomcatField().getComboBox().getSelectedItem();
         if (selectedItem != null) {
-            TomcatInfoConfigs.getInstance(project).setCurrent(selectedItem);
             tomcatRunConfiguration.setTomcatInfo(selectedItem);
         }
         tomcatRunConfiguration.setDocBase(runnerSetting.getDocBaseField().getText());
+        tomcatRunConfiguration.setCustomContext(runnerSetting.getCustomContextField().getText());
         tomcatRunConfiguration.setContextPath(runnerSetting.getContextPathField().getText());
         tomcatRunConfiguration.setPort(runnerSetting.getPortField().getText());
         tomcatRunConfiguration.setAjpPort(runnerSetting.getAjpPort().getText());
@@ -176,18 +112,7 @@ public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration>
         tomcatRunConfiguration.setVmOptions(runnerSetting.getVmOptons().getText());
         tomcatRunConfiguration.setEnvOptions(runnerSetting.getEnvOptions().getEnvs());
         tomcatRunConfiguration.setPassParentEnvironmentVariables(runnerSetting.getEnvOptions().isPassParentEnvs());
-        tomcatRunConfiguration.setClassName(runnerSetting.getClassName().getText());
-        tomcatRunConfiguration.setDebug(runnerSetting.getDebug().getText());
-        tomcatRunConfiguration.setDigest(runnerSetting.getDigest().getText());
-        tomcatRunConfiguration.setRoleNameCol(runnerSetting.getRoleNameCol().getText());
-        tomcatRunConfiguration.setUserCredCol(runnerSetting.getUserCredCol().getText());
-        tomcatRunConfiguration.setUserNameCol(runnerSetting.getUserNameCol().getText());
-        tomcatRunConfiguration.setUserRoleTable(runnerSetting.getUserRoleTable().getText());
-        tomcatRunConfiguration.setUserTable(runnerSetting.getUserTable().getText());
-        tomcatRunConfiguration.setJndiGlobal(runnerSetting.getJndiGlobal().getText());
-        tomcatRunConfiguration.setJndiName(runnerSetting.getJndiName().getText());
-        tomcatRunConfiguration.setJndiType(runnerSetting.getJndiType().getText());
-        tomcatRunConfiguration.setDataSourceName(runnerSetting.getDataSourceName().getText());
+
 
     }
 
@@ -197,33 +122,15 @@ public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration>
 
         ComboboxWithBrowseButton tomcatField = runnerSetting.getTomcatField();
         TextFieldWithBrowseButton docBaseField = runnerSetting.getDocBaseField();
-//        TextFieldWithBrowseButton docModuleRoot = runnerSetting.getModuleName();
+        TextFieldWithBrowseButton customContextField = runnerSetting.getCustomContextField();
+
         JTextField contextPathField = runnerSetting.getContextPathField();
         JFormattedTextField portField = runnerSetting.getPortField();
         JFormattedTextField ajpPort = runnerSetting.getAjpPort();
         JFormattedTextField adminPort = runnerSetting.getAdminPort();
-        JTextField className = runnerSetting.getClassName();
-        JTextField debug = runnerSetting.getDebug();
-        JTextField digest = runnerSetting.getDigest();
-        JTextField roleNameCol = runnerSetting.getRoleNameCol();
-        JTextField userCredCol = runnerSetting.getUserCredCol();
-        JTextField userNameCol = runnerSetting.getUserNameCol();
-        JTextField userRoleTable = runnerSetting.getUserRoleTable();
-        JTextField userTable = runnerSetting.getUserTable();
-        JTextField jndiGlobal = runnerSetting.getJndiGlobal();
-        JTextField jndiName = runnerSetting.getJndiName();
-        JTextField jndiType = runnerSetting.getJndiType();
-        JTextField dataSourceName = runnerSetting.getDataSourceName();
+
         JXButton configrationButton = runnerSetting.getConfigrationButton();
-        configrationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, TomcatSettingConfigurable.class);
-
-            }
-        });
+        configrationButton.addActionListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, TomcatSettingConfigurable.class));
 
 
         VirtualFile baseDir = VirtualFileManager.getInstance().getFileSystem("file").findFileByPath(project.getBasePath());
@@ -236,9 +143,17 @@ public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration>
                     String text = docBaseField.getText();
                     if (text != null && !text.trim().equals("")) {
                         VirtualFile fileByIoFile = LocalFileSystem.getInstance().findFileByIoFile(new File(text));
+
                         Module module = ModuleUtilCore.findModuleForFile(fileByIoFile, project);
                         String contextPath = module == null ? "/" : "/" + module.getName();
                         contextPathField.setText(contextPath);
+
+                        File contextFile = new File(text + "/META-INF/context.xml");
+                        if (contextFile.exists()) {
+                            customContextField.setText(contextFile.getPath());
+                            customContextField.getTextField().setText(contextFile.getPath());
+
+                        }
 
                     }
                 }
@@ -246,26 +161,8 @@ public class TomcatSettingsEditor extends SettingsEditor<TomcatRunConfiguration>
             }
         });
 
-//        docModuleRoot.addBrowseFolderListener("Module Root", "Choose Module Root Folder", project, FileChooserDescriptorFactory.createSingleFolderDescriptor().withRoots(baseDir));
-//        docModuleRoot.getTextField().getDocument().addDocumentListener(new DocumentAdapter() {
-//            @Override
-//            protected void textChanged(DocumentEvent documentEvent) {
-//
-//                if (!documentEvent.getType().equals(DocumentEvent.EventType.REMOVE)) {
-//                    String text = docBaseField.getText();
-//                    if (text != null && !text.trim().equals("")) {
-//                        VirtualFile fileByIoFile = LocalFileSystem.getInstance().findFileByIoFile(new File(text));
-//                        Module module = ModuleUtilCore.findModuleForFile(fileByIoFile, project);
-//                        if(module == null) {
-//                            throw new RuntimeException("The Module Root specified is not a module according to Intellij");
-//                        }
-//                    }
-//                }
-//
-//            }
-//        });
+        customContextField.addBrowseFolderListener("Context xml", "Choose custom context xml file", project, FileChooserDescriptorFactory.createSingleFileDescriptor().withRoots(baseDir));
 
-//        docModuleRoot.setText(baseDir.getName());
         portField.setValue(8080);
         ajpPort.setValue(8009);
         adminPort.setValue(8005);
