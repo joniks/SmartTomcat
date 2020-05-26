@@ -70,7 +70,7 @@ public class AppCommandLineState extends JavaCommandLineState {
         try {
 
             Path tomcatInstallationPath = Paths.get(configuration.getTomcatInfo().getPath());
-            String moduleRoot = configuration.getModuleName();
+            String docBase = configuration.getDocBase();
             String contextPath = configuration.getContextPath();
             String tomcatVersion = configuration.getTomcatInfo().getVersion();
             String vmOptions = configuration.getVmOptions();
@@ -100,8 +100,7 @@ public class AppCommandLineState extends JavaCommandLineState {
                 throw new ExecutionException("The Module Root specified is not a module according to Intellij");
             }
 
-            String userHome = System.getProperty("user.home");
-            Path workPath = Paths.get(userHome, ".SmartTomcat", project.getName(), module.getName());
+            Path workPath = Paths.get(docBase, "/..");
             Path confPath = workPath.resolve("conf");
             if (!confPath.toFile().exists()) {
                 confPath.toFile().mkdirs();
@@ -110,7 +109,7 @@ public class AppCommandLineState extends JavaCommandLineState {
 
             FileUtil.copyFileOrDir(tomcatInstallationPath.resolve("conf").toFile(), confPath.toFile());
 
-            javaParams.setWorkingDirectory(workPath.toFile());
+            javaParams.setWorkingDirectory(docBase);
 
 
             updateServerConf(tomcatVersion, module, confPath, contextPath, configuration);
@@ -182,7 +181,7 @@ public class AppCommandLineState extends JavaCommandLineState {
             }
         }
 
-        contextE.setAttribute("docBase", cfg.getDocBase());
+        contextE.setAttribute("docBase", cfg.getDocBase() + "/war");
         contextE.setAttribute("path", (contextPath.startsWith("/") ? "" : "/") + contextPath);
         hostNode.appendChild(contextE);
 
