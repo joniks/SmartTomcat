@@ -22,21 +22,16 @@ import java.util.List;
  * Time   : 00:13
  */
 public class RunnerSetting {
+    private final Project project;
     private JPanel mainPanel;
     private ComboboxWithBrowseButton tomcatField;
     private TextFieldWithBrowseButton docBaseField;
     private JTextField contextPathField;
     private JFormattedTextField portField;
-
-
     private JXButton configrationButton;
     private RawCommandLineEditor vmOptons;
     private EnvironmentVariablesComponent envOptions;
-    private JFormattedTextField ajpPort;
     private JFormattedTextField adminPort;
-    private TextFieldWithBrowseButton customContextField;
-
-    private Project project;
 
     public RunnerSetting(Project project) {
         this.project = project;
@@ -62,9 +57,6 @@ public class RunnerSetting {
         return portField;
     }
 
-    public JFormattedTextField getAjpPort() {
-        return ajpPort;
-    }
 
     public JFormattedTextField getAdminPort() {
         return adminPort;
@@ -80,10 +72,6 @@ public class RunnerSetting {
 
     public EnvironmentVariablesComponent getEnvOptions() {
         return envOptions;
-    }
-
-    public TextFieldWithBrowseButton getCustomContextField() {
-        return customContextField;
     }
 
     private void createUIComponents() {

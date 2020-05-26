@@ -35,6 +35,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -116,14 +117,14 @@ public class AppCommandLineState extends JavaCommandLineState {
 
 
             javaParams.setPassParentEnvs(configuration.getPassParentEnvironmentVariables());
-            javaParams.getVMParametersList().addParametersString(vmOptions);
             if (envOptions != null) {
                 javaParams.setEnv(envOptions);
             }
+            javaParams.getVMParametersList().addParametersString(vmOptions);
             return javaParams;
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
 
 
@@ -148,13 +149,11 @@ public class AppCommandLineState extends JavaCommandLineState {
         XPath xpath = xPathfactory.newXPath();
         XPathExpression exprConnectorShutdown = xpath.compile("/Server[@shutdown='SHUTDOWN']");
         XPathExpression exprConnector = xpath.compile("/Server/Service[@name='Catalina']/Connector[@protocol='HTTP/1.1']");
-        XPathExpression exprConnectorAjp = xpath.compile("/Server/Service[@name='Catalina']/Connector[@protocol='AJP/1.3']");
         XPathExpression expr = xpath.compile("/Server/Service[@name='Catalina']/Engine[@name='Catalina']/Host");
         XPathExpression exprContext = xpath.compile
                 ("/Server/Service[@name='Catalina']/Engine[@name='Catalina']/Host/Context");
 
         Element portShutdown = (Element) exprConnectorShutdown.evaluate(doc, XPathConstants.NODE);
-        Element portEAjp = (Element) exprConnectorAjp.evaluate(doc, XPathConstants.NODE);
         Element portE = (Element) exprConnector.evaluate(doc, XPathConstants.NODE);
         Node hostNode = (Node) expr.evaluate(doc, XPathConstants.NODE);
         NodeList nodeList = (NodeList) exprContext.evaluate(doc, XPathConstants.NODESET);
@@ -166,21 +165,20 @@ public class AppCommandLineState extends JavaCommandLineState {
             }
         }
         portShutdown.setAttribute("port", cfg.getAdminPort());
-        portEAjp.setAttribute("port", cfg.getAjpPort());
         portE.setAttribute("port", cfg.getPort());
 
-
         Element contextE = doc.createElement("Context");
-
-
-        String customContext = cfg.getCustomContext();
-        if (StringUtil.isNotEmpty(customContext)) {
-            File customContextFile = new File(customContext);
+        String customContext = cfg.getDocBase() + "/META-INF/context_local.xml";
+        File customContextFile = new File(customContext);
+        if (customContextFile.exists()) {
+            org.w3c.dom.Document customContextDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(customContextFile);
+            contextE = (Element) doc.importNode(customContextDoc.getDocumentElement(), true);
+        } else {
+            customContext = cfg.getDocBase() + "/META-INF/context.xml";
+            customContextFile = new File(customContext);
             if (customContextFile.exists()) {
-
                 org.w3c.dom.Document customContextDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(customContextFile);
                 contextE = (Element) doc.importNode(customContextDoc.getDocumentElement(), true);
-
             }
         }
 
@@ -235,7 +233,7 @@ public class AppCommandLineState extends JavaCommandLineState {
 
         Source source = new DOMSource(doc);
         StreamResult result = new StreamResult(new OutputStreamWriter(new FileOutputStream(serverXml.toFile()),
-                "UTF-8"));
+                StandardCharsets.UTF_8));
         Transformer xformer = TransformerFactory.newInstance().newTransformer();
         xformer.transform(source, result);
 

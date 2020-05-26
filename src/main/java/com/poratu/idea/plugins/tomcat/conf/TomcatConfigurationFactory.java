@@ -1,5 +1,6 @@
 package com.poratu.idea.plugins.tomcat.conf;
 
+import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
@@ -25,8 +26,20 @@ public class TomcatConfigurationFactory extends ConfigurationFactory {
         return new TomcatRunConfiguration(project, this, "SmartTomcat");
     }
 
+    @NotNull
+    @Override
+    public RunConfiguration createTemplateConfiguration(@NotNull Project project, @NotNull RunManager runManager) {
+        return super.createTemplateConfiguration(project, runManager);
+    }
+
     @Override
     public String getName() {
         return FACTORY_NAME;
+    }
+
+    @NotNull
+    @Override
+    public String getId() {
+        return getName();
     }
 }

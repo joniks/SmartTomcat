@@ -3,40 +3,53 @@ package com.poratu.idea.plugins.tomcat.conf;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.xmlb.XmlSerializer;
 import com.poratu.idea.plugins.tomcat.setting.TomcatInfo;
+import com.poratu.idea.plugins.tomcat.setting.TomcatInfoConfigs;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Author : zengkid
  * Date   : 2/16/2017
  * Time   : 3:14 PM
  */
-public class TomcatRunConfiguration extends RunConfigurationBase implements RunProfileWithCompileBeforeLaunchOption {
+public class TomcatRunConfiguration extends LocatableConfigurationBase implements RunProfileWithCompileBeforeLaunchOption {
     private TomcatInfo tomcatInfo;
     private String docBase;
-    private String customContext;
     private String moduleName;
     private String contextPath;
-    private String port;
-    private String ajpPort;
-    private String adminPort;
+    private String port = "8080";
+    private String adminPort = "8005";
     private String vmOptions;
     private Map<String, String> envOptions;
     private Boolean passParentEnvironmentVariables = true;
 
     protected TomcatRunConfiguration(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(project, factory, name);
+        TomcatInfoConfigs applicationService = ServiceManager.getService(TomcatInfoConfigs.class);
+        List<TomcatInfo> tomcatInfos = applicationService.getTomcatInfos();
+        if (!tomcatInfos.isEmpty()) {
+            this.tomcatInfo = tomcatInfos.get(0);
+        }
     }
 
     @NotNull
@@ -53,6 +66,35 @@ public class TomcatRunConfiguration extends RunConfigurationBase implements RunP
 
     @Override
     public void checkConfiguration() {
+
+    }
+
+    @Override
+    public void onNewConfigurationCreated() {
+        super.onNewConfigurationCreated();
+
+        try {
+            Project project = getProject();
+
+            ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
+            VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
+
+            Optional<VirtualFile> webinfFile = Stream.of(sourceRoots).map(VirtualFile::getParent).distinct().flatMap(f ->
+                    Stream.of(f.getChildren()).filter(c -> {
+                        Path path = Paths.get(c.getCanonicalPath(), "WEB-INF");
+                        return path.toFile().exists();
+                    })).distinct().findFirst();
+
+
+            if (webinfFile.isPresent()) {
+                VirtualFile file = webinfFile.get();
+                docBase = file.getCanonicalPath();
+                moduleName = ModuleUtil.findModuleForFile(file, project).getName();
+                contextPath = "/" + moduleName;
+            }
+        } catch (Exception e) {
+            //do nothing.
+        }
 
     }
 
@@ -91,14 +133,6 @@ public class TomcatRunConfiguration extends RunConfigurationBase implements RunP
         this.moduleName = moduleName;
     }
 
-    public String getCustomContext() {
-        return customContext;
-    }
-
-    public void setCustomContext(String customContext) {
-        this.customContext = customContext;
-    }
-
     public String getContextPath() {
         return contextPath;
     }
@@ -115,13 +149,6 @@ public class TomcatRunConfiguration extends RunConfigurationBase implements RunP
         this.port = port;
     }
 
-    public String getAjpPort() {
-        return ajpPort;
-    }
-
-    public void setAjpPort(String ajpPort) {
-        this.ajpPort = ajpPort;
-    }
 
     public String getAdminPort() {
         return adminPort;
@@ -163,101 +190,6 @@ public class TomcatRunConfiguration extends RunConfigurationBase implements RunP
         this.passParentEnvironmentVariables = passParentEnvironmentVariables;
     }
 
-//    public String getClassName() {
-//        return className;
-//    }
-//
-//    public void setClassName(String className) {
-//        this.className = className;
-//    }
-//
-//    public String getDebug() {
-//        return debug;
-//    }
-//
-//    public void setDebug(String debug) {
-//        this.debug = debug;
-//    }
-//
-//    public String getDigest() {
-//        return digest;
-//    }
-//
-//    public void setDigest(String digest) {
-//        this.digest = digest;
-//    }
-//
-//    public String getRoleNameCol() {
-//        return roleNameCol;
-//    }
-//
-//    public void setRoleNameCol(String roleNameCol) {
-//        this.roleNameCol = roleNameCol;
-//    }
-//
-//    public String getUserCredCol() {
-//        return userCredCol;
-//    }
-//
-//    public void setUserCredCol(String userCredCol) {
-//        this.userCredCol = userCredCol;
-//    }
-//
-//    public String getUserNameCol() {
-//        return userNameCol;
-//    }
-//
-//    public void setUserNameCol(String userNameCol) {
-//        this.userNameCol = userNameCol;
-//    }
-//
-//    public String getUserRoleTable() {
-//        return userRoleTable;
-//    }
-//
-//    public void setUserRoleTable(String userRoleTable) {
-//        this.userRoleTable = userRoleTable;
-//    }
-//
-//    public String getUserTable() {
-//        return userTable;
-//    }
-//
-//    public void setUserTable(String userTable) {
-//        this.userTable = userTable;
-//    }
-//
-//    public String getJndiGlobal() {
-//        return jndiGlobal;
-//    }
-//
-//    public void setJndiGlobal(String jndiGlobal) {
-//        this.jndiGlobal = jndiGlobal;
-//    }
-//
-//    public String getJndiName() {
-//        return jndiName;
-//    }
-//
-//    public void setJndiName(String jndiName) {
-//        this.jndiName = jndiName;
-//    }
-//
-//    public String getJndiType() {
-//        return jndiType;
-//    }
-//
-//    public void setJndiType(String jndiType) {
-//        this.jndiType = jndiType;
-//    }
-//
-//    public String getDataSourceName() {
-//        return dataSourceName;
-//    }
-//
-//    public void setDataSourceName(String dataSourceName) {
-//        this.dataSourceName = dataSourceName;
-//    }
 
     @Override
     @NotNull
