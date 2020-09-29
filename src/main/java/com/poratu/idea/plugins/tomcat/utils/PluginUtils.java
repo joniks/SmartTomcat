@@ -1,8 +1,11 @@
 package com.poratu.idea.plugins.tomcat.utils;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.util.JdkBundle;
+import com.poratu.idea.plugins.tomcat.conf.TomcatRunConfiguration;
 import com.poratu.idea.plugins.tomcat.setting.TomcatInfo;
 import org.apache.commons.lang.StringUtils;
 
@@ -10,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 /**
@@ -90,5 +95,15 @@ public abstract class PluginUtils {
             result = strings[1].trim();
         }
         return result;
+    }
+
+    public static Path getWorkPath(TomcatRunConfiguration configuration) {
+
+        String userHome = System.getProperty("user.home");
+        Project project = configuration.getProject();
+        Module module = configuration.getModule();
+        Path workPath = Paths.get(userHome, ".SmartTomcat", project.getName(), module.getName());
+
+        return workPath;
     }
 }

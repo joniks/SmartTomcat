@@ -36,7 +36,7 @@ public class TomcatRunConfigurationProducer extends LazyRunConfigurationProducer
             if (tomcatInfos != null && tomcatInfos.size() > 0) {
                 TomcatInfo tomcatInfo = tomcatInfos.get(0);
                 configuration.setTomcatInfo(tomcatInfo);
-            } else  {
+            } else {
                 throw new RuntimeException("Not found any Tomcat Server, please add Tomcat Server first.");
             }
 
@@ -45,7 +45,7 @@ public class TomcatRunConfigurationProducer extends LazyRunConfigurationProducer
             configuration.setName(module.getName());
             configuration.setDocBase(virtualFile.getCanonicalPath());
             configuration.setContextPath("/" + module.getName());
-            configuration.setModuleName(module.getName());
+            configuration.setModule(module);
 
             final RunnerAndConfigurationSettings settings =
                     RunManager.getInstance(context.getProject()).createConfiguration(configuration, getConfigurationFactory());
@@ -62,12 +62,14 @@ public class TomcatRunConfigurationProducer extends LazyRunConfigurationProducer
         VirtualFile vf = context.getLocation().getVirtualFile();
         if (vf != null && vf.isDirectory()) {
             Module module = context.getModule();
-            Optional<VirtualFile> webModule = getWebModule(module);
-            boolean isWebModule = webModule.isPresent();
-            if (isWebModule) {
-                VirtualFile virtualFile = webModule.get();
-                if (vf.getCanonicalPath().equals(virtualFile.getCanonicalPath())) {
-                    result = true;
+            if (module != null) {
+                Optional<VirtualFile> webModule = getWebModule(module);
+                boolean isWebModule = webModule.isPresent();
+                if (isWebModule) {
+                    VirtualFile virtualFile = webModule.get();
+                    if (vf.getCanonicalPath().equals(virtualFile.getCanonicalPath())) {
+                        result = true;
+                    }
                 }
             }
         }

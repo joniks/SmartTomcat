@@ -7,14 +7,12 @@ import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.poratu.idea.plugins.tomcat.utils.PluginUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -42,7 +40,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Author : zengkid
@@ -70,38 +67,27 @@ public class AppCommandLineState extends JavaCommandLineState {
         try {
 
             Path tomcatInstallationPath = Paths.get(configuration.getTomcatInfo().getPath());
-            String moduleRoot = configuration.getModuleName();
+            Project project = this.configuration.getProject();
+            Module module = configuration.getModule();
             String contextPath = configuration.getContextPath();
             String tomcatVersion = configuration.getTomcatInfo().getVersion();
             String vmOptions = configuration.getVmOptions();
             Map<String, String> envOptions = configuration.getEnvOptions();
 
-            Project project = this.configuration.getProject();
-
             JavaParameters javaParams = new JavaParameters();
-
-
             ProjectRootManager manager = ProjectRootManager.getInstance(project);
             javaParams.setJdk(manager.getProjectSdk());
-
             javaParams.setDefaultCharset(project);
-
             javaParams.setMainClass(TOMCAT_MAIN_CLASS);
             javaParams.getProgramParametersList().add("start");
             addBinFolder(tomcatInstallationPath, javaParams);
             addLibFolder(tomcatInstallationPath, javaParams);
 
-            File file = new File(configuration.getDocBase());
-            VirtualFile fileByIoFile = LocalFileSystem.getInstance().findFileByIoFile(file);
-            Module module = ModuleUtilCore.findModuleForFile(fileByIoFile, configuration.getProject());
-
-
             if (module == null) {
                 throw new ExecutionException("The Module Root specified is not a module according to Intellij");
             }
 
-            String userHome = System.getProperty("user.home");
-            Path workPath = Paths.get(userHome, ".SmartTomcat", project.getName(), module.getName());
+            Path workPath = PluginUtils.getWorkPath(configuration);
             Path confPath = workPath.resolve("conf");
             if (!confPath.toFile().exists()) {
                 confPath.toFile().mkdirs();
@@ -120,7 +106,8 @@ public class AppCommandLineState extends JavaCommandLineState {
             if (envOptions != null) {
                 javaParams.setEnv(envOptions);
             }
-            javaParams.getVMParametersList().addParametersString(vmOptions);
+            String options = "-Duser.language=en -Duser.region=US " + vmOptions; //set en_US as default
+            javaParams.getVMParametersList().addParametersString(options);
             return javaParams;
 
         } catch (Exception e) {
@@ -133,8 +120,7 @@ public class AppCommandLineState extends JavaCommandLineState {
     @Nullable
     @Override
     protected ConsoleView createConsole(@NotNull Executor executor) {
-        ConsoleView consoleView = new ServerConsoleView(configuration);
-        return consoleView;
+        return new ServerConsoleView(configuration);
     }
 
     private void updateServerConf(String tomcatVersion, Module module, Path confPath, String contextPath, TomcatRunConfiguration cfg) throws Exception {
@@ -195,7 +181,7 @@ public class AppCommandLineState extends JavaCommandLineState {
                 paths.add(classPath);
             }
             int index = tomcatVersion.indexOf(".");
-            int version = Integer.valueOf(tomcatVersion.substring(0, index));
+            int version = Integer.parseInt(tomcatVersion.substring(0, index));
 
 
             if (version >= 8) { //for tomcat8
@@ -225,7 +211,7 @@ public class AppCommandLineState extends JavaCommandLineState {
             } else if (version >= 6) { //for tomcat6-7
                 Element loaderE = doc.createElement("Loader");
                 loaderE.setAttribute("className", "org.apache.catalina.loader.VirtualWebappLoader");
-                loaderE.setAttribute("virtualClasspath", paths.stream().collect(Collectors.joining(";")));
+                loaderE.setAttribute("virtualClasspath", String.join(";", paths));
                 contextE.appendChild(loaderE);
             }
         }
