@@ -96,7 +96,7 @@ public class AppCommandLineState extends JavaCommandLineState {
 
             FileUtil.copyFileOrDir(tomcatInstallationPath.resolve("conf").toFile(), confPath.toFile());
 
-            javaParams.setWorkingDirectory(workPath.toFile());
+            javaParams.setWorkingDirectory(configuration.getDocBase());
 
 
             updateServerConf(tomcatVersion, module, confPath, contextPath, configuration);
