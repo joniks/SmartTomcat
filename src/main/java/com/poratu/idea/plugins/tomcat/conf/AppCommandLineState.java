@@ -168,7 +168,7 @@ public class AppCommandLineState extends JavaCommandLineState {
             }
         }
 
-        contextE.setAttribute("docBase", cfg.getDocBase());
+        contextE.setAttribute("docBase", cfg.getDocBase() + "/war");
         contextE.setAttribute("path", (contextPath.startsWith("/") ? "" : "/") + contextPath);
         hostNode.appendChild(contextE);
 

@@ -99,10 +99,8 @@ public abstract class PluginUtils {
 
     public static Path getWorkPath(TomcatRunConfiguration configuration) {
 
-        String userHome = System.getProperty("user.home");
-        Project project = configuration.getProject();
-        Module module = configuration.getModule();
-        Path workPath = Paths.get(userHome, ".SmartTomcat", project.getName(), module.getName());
+        String docBase = configuration.getDocBase();
+        Path workPath = Paths.get(docBase, "/..");
 
         return workPath;
     }
